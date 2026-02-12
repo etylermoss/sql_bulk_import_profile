@@ -1,0 +1,82 @@
+[package]
+name = "sql_bulk_import_profile"
+description = "Blah blah blah"
+version = "0.1.0"
+edition = "2024"
+default-run = "sql_bulk_import_profile"
+
+[profile.release]
+lto = "fat"
+overflow-checks = false
+opt-level = 3
+
+[features]
+default = ["lua", "rhai"]
+lua = ["dep:mlua"]
+rhai = ["dep:rhai"]
+
+[dependencies]
+rustc-hash = "2.1.1"
+indoc = "2.0.7"
+arrayvec = "0.7.6"
+smallvec = "1.15.1"
+indexmap = "2.13.0"
+memchr = "2.8.0"
+serde = "1.0.228"
+serde_json = "1.0.149"
+rust_decimal = "1.40.0"
+color-eyre = "0.6.5"
+futures = "0.3.31"
+log = "0.4.29"
+simplelog = "0.12.2"
+itertools = "0.14.0"
+csv-core = "0.1.13"
+
+[dependencies.thiserror]
+version = "2.0.18"
+features = ["std"]
+
+[dependencies.clap]
+version = "4.5.57"
+features = ["derive", "env", "cargo"]
+
+[dependencies.schemars]
+version = "1.2.1"
+features = ["preserve_order"]
+
+[dependencies.tokio]
+version = "1.49.0"
+features = ["rt", "rt-multi-thread", "macros", "fs"]
+
+[dependencies.tokio-util]
+version = "0.7.18"
+features = ["compat"]
+
+[dependencies.quick-xml]
+version = "0.39.0"
+features = ["async-tokio", "encoding"]
+
+[dependencies.tiberius]
+git = "https://github.com/etylermoss/tiberius.git"
+branch = "query-column-metadata"
+version = "0.12.3"
+features = ["tokio", "rust_decimal"]
+
+[dependencies.petgraph]
+git = "https://github.com/etylermoss/petgraph.git"
+branch = "toposort_grouped"
+version = "0.8.3"
+
+[dependencies.mlua]
+version = "0.11.6"
+features = ["luau", "vendored", "send"]
+optional = true
+
+[dependencies.rhai]
+version = "1.24.0"
+features = ["sync", "decimal", "no_closure", "no_custom_syntax"]
+optional = true
+
+[dev-dependencies]
+testcontainers = "0.27.0"
+itertools = "0.14.0"

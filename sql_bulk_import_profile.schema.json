@@ -1,0 +1,622 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "ImportProfile",
+	"type": "object",
+	"properties": {
+		"name": {
+			"type": "string"
+		},
+		"description": {
+			"type": [
+				"string",
+				"null"
+			]
+		},
+		"data_source_config": {
+			"$ref": "#/$defs/ImportProfileDataSourceConfig"
+		},
+		"preprocess_script": {
+			"anyOf": [
+				{
+					"$ref": "#/$defs/PreprocessScript"
+				},
+				{
+					"type": "null"
+				}
+			]
+		},
+		"table_mappers": {
+			"type": "array",
+			"items": {
+				"$ref": "#/$defs/TableMapper"
+			}
+		}
+	},
+	"required": [
+		"name",
+		"data_source_config",
+		"table_mappers"
+	],
+	"$defs": {
+		"ImportProfileDataSourceConfig": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"XmlDataSourceConfig": {
+							"type": "object",
+							"properties": {
+								"path": {
+									"type": "string"
+								},
+								"field_groups": {
+									"type": "object",
+									"additionalProperties": {
+										"type": "array",
+										"items": {
+											"$ref": "#/$defs/Field"
+										}
+									}
+								},
+								"selector": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"path",
+								"field_groups",
+								"selector"
+							]
+						}
+					},
+					"required": [
+						"XmlDataSourceConfig"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"DelimitedDataSourceConfig": {
+							"type": "object",
+							"properties": {
+								"path": {
+									"type": "string"
+								},
+								"field_groups": {
+									"type": "object",
+									"additionalProperties": {
+										"type": "array",
+										"items": {
+											"$ref": "#/$defs/Field"
+										}
+									}
+								},
+								"reader_config": {
+									"$ref": "#/$defs/DelimitedReaderConfig"
+								}
+							},
+							"required": [
+								"path",
+								"field_groups",
+								"reader_config"
+							]
+						}
+					},
+					"required": [
+						"DelimitedDataSourceConfig"
+					],
+					"additionalProperties": false
+				}
+			]
+		},
+		"Field": {
+			"type": "object",
+			"properties": {
+				"name": {
+					"type": "string"
+				},
+				"formatters": {
+					"type": [
+						"array",
+						"null"
+					],
+					"items": {
+						"$ref": "#/$defs/Formatter"
+					}
+				},
+				"required": {
+					"anyOf": [
+						{
+							"$ref": "#/$defs/Required"
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"required": [
+				"name"
+			]
+		},
+		"Formatter": {
+			"oneOf": [
+				{
+					"description": "Trim whitespace characters from the field",
+					"type": "string",
+					"const": "Trim"
+				},
+				{
+					"description": "Uppercase the field",
+					"type": "string",
+					"const": "Uppercase"
+				},
+				{
+					"description": "Lowercase the field",
+					"type": "string",
+					"const": "Lowercase"
+				},
+				{
+					"description": "Apply regex substitution to the field",
+					"type": "string",
+					"const": "Regex"
+				},
+				{
+					"description": "Map values for the field",
+					"type": "object",
+					"properties": {
+						"Map": {
+							"type": "object",
+							"properties": {
+								"default": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"mappings": {
+									"type": "array",
+									"items": {
+										"type": "array",
+										"prefixItems": [
+											{
+												"type": "string"
+											},
+											{
+												"type": "string"
+											}
+										],
+										"minItems": 2,
+										"maxItems": 2
+									}
+								}
+							},
+							"required": [
+								"mappings"
+							]
+						}
+					},
+					"required": [
+						"Map"
+					],
+					"additionalProperties": false
+				}
+			]
+		},
+		"Required": {
+			"oneOf": [
+				{
+					"description": "Drop record if field is empty",
+					"type": "string",
+					"const": "Drop"
+				},
+				{
+					"description": "Error on record if field is empty",
+					"type": "string",
+					"const": "Error"
+				}
+			]
+		},
+		"DelimitedReaderConfig": {
+			"oneOf": [
+				{
+					"type": "string",
+					"enum": [
+						"Csv",
+						"Txt"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"Custom": {
+							"$ref": "#/$defs/DelimitedReaderCustomConfig"
+						}
+					},
+					"required": [
+						"Custom"
+					],
+					"additionalProperties": false
+				}
+			]
+		},
+		"DelimitedReaderCustomConfig": {
+			"type": "object",
+			"properties": {
+				"delimiter": {
+					"type": "string",
+					"minLength": 1,
+					"maxLength": 1
+				},
+				"terminator": {
+					"$ref": "#/$defs/Terminator"
+				},
+				"quote": {
+					"type": "string",
+					"minLength": 1,
+					"maxLength": 1,
+					"default": "\u0000"
+				},
+				"quoting": {
+					"type": "boolean",
+					"default": false
+				},
+				"comment": {
+					"type": [
+						"string",
+						"null"
+					],
+					"minLength": 1,
+					"maxLength": 1,
+					"default": null
+				},
+				"escape": {
+					"type": [
+						"string",
+						"null"
+					],
+					"minLength": 1,
+					"maxLength": 1,
+					"default": null
+				},
+				"double_quote": {
+					"type": "boolean",
+					"default": false
+				}
+			},
+			"required": [
+				"delimiter",
+				"terminator"
+			]
+		},
+		"Terminator": {
+			"oneOf": [
+				{
+					"type": "string",
+					"enum": [
+						"CRLF"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"Any": {
+							"type": "string",
+							"minLength": 1,
+							"maxLength": 1
+						}
+					},
+					"required": [
+						"Any"
+					],
+					"additionalProperties": false
+				}
+			]
+		},
+		"PreprocessScript": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"File": {
+							"type": "object",
+							"properties": {
+								"path": {
+									"type": "string"
+								},
+								"language": {
+									"anyOf": [
+										{
+											"$ref": "#/$defs/PreprocessLanguage"
+										},
+										{
+											"type": "null"
+										}
+									]
+								}
+							},
+							"required": [
+								"path"
+							]
+						}
+					},
+					"required": [
+						"File"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"Inline": {
+							"type": "object",
+							"properties": {
+								"script": {
+									"type": "string"
+								},
+								"language": {
+									"$ref": "#/$defs/PreprocessLanguage"
+								}
+							},
+							"required": [
+								"script",
+								"language"
+							]
+						}
+					},
+					"required": [
+						"Inline"
+					],
+					"additionalProperties": false
+				}
+			]
+		},
+		"PreprocessLanguage": {
+			"type": "string",
+			"enum": [
+				"Lua",
+				"Rhai"
+			]
+		},
+		"TableMapper": {
+			"type": "object",
+			"properties": {
+				"name": {
+					"type": "string"
+				},
+				"field_group": {
+					"type": "string"
+				},
+				"table_identifier": {
+					"type": "string"
+				},
+				"delete_mode": {
+					"$ref": "#/$defs/DeleteMode"
+				},
+				"delete_action": {
+					"$ref": "#/$defs/DeleteAction"
+				},
+				"duplicate_action": {
+					"$ref": "#/$defs/DuplicateAction"
+				},
+				"preprocess_function": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"columns": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/TableMapperColumn"
+					}
+				},
+				"key_columns": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"name",
+				"field_group",
+				"table_identifier",
+				"delete_mode",
+				"delete_action",
+				"duplicate_action",
+				"columns",
+				"key_columns"
+			]
+		},
+		"DeleteMode": {
+			"type": "string",
+			"enum": [
+				"Partial",
+				"Full"
+			]
+		},
+		"DeleteAction": {
+			"type": "string",
+			"enum": [
+				"None"
+			]
+		},
+		"DuplicateAction": {
+			"type": "string",
+			"enum": [
+				"Reject",
+				"Retain",
+				"Dump",
+				"NoCheck"
+			]
+		},
+		"TableMapperColumn": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"Static": {
+							"$ref": "#/$defs/StaticColumn"
+						}
+					},
+					"required": [
+						"Static"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"Parser": {
+							"$ref": "#/$defs/ParserColumn"
+						}
+					},
+					"required": [
+						"Parser"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"Lookup": {
+							"$ref": "#/$defs/LookupColumn"
+						}
+					},
+					"required": [
+						"Lookup"
+					],
+					"additionalProperties": false
+				}
+			]
+		},
+		"StaticColumn": {
+			"type": "object",
+			"properties": {
+				"column_identifier": {
+					"type": "string"
+				},
+				"map_column": {
+					"type": "boolean"
+				},
+				"value": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"column_identifier",
+				"map_column",
+				"value"
+			]
+		},
+		"ParserColumn": {
+			"type": "object",
+			"properties": {
+				"column_identifier": {
+					"type": "string"
+				},
+				"map_column": {
+					"type": "boolean"
+				},
+				"field_name": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"column_identifier",
+				"map_column",
+				"field_name"
+			]
+		},
+		"LookupColumn": {
+			"type": "object",
+			"properties": {
+				"column_identifier": {
+					"type": "string"
+				},
+				"map_column": {
+					"type": "boolean"
+				},
+				"table_identifier": {
+					"type": "string"
+				},
+				"output_column_identifier": {
+					"type": "string"
+				},
+				"key_columns": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/LookupKeyColumn"
+					}
+				}
+			},
+			"required": [
+				"column_identifier",
+				"map_column",
+				"table_identifier",
+				"output_column_identifier",
+				"key_columns"
+			]
+		},
+		"LookupKeyColumn": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"ParserKeyColumn": {
+							"$ref": "#/$defs/ParserKeyColumn"
+						}
+					},
+					"required": [
+						"ParserKeyColumn"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"ProcessedKeyColumn": {
+							"$ref": "#/$defs/ProcessedKeyColumn"
+						}
+					},
+					"required": [
+						"ProcessedKeyColumn"
+					],
+					"additionalProperties": false
+				}
+			]
+		},
+		"ParserKeyColumn": {
+			"type": "object",
+			"properties": {
+				"key_column_identifier": {
+					"type": "string"
+				},
+				"field_name": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"key_column_identifier",
+				"field_name"
+			]
+		},
+		"ProcessedKeyColumn": {
+			"type": "object",
+			"properties": {
+				"key_column_identifier": {
+					"type": "string"
+				},
+				"column_identifier": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"key_column_identifier",
+				"column_identifier"
+			]
+		}
+	}
+}

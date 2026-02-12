@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Companies>
+    <Company>
+        <Code>AAPL</Code>
+        <Name>Apple</Name>
+        <CountryCode>FR</CountryCode>
+    </Company>
+    <Company>
+        <Code>MSFT</Code>
+        <Name>Microsoft</Name>
+        <CountryCode>FR</CountryCode>
+    </Company>
+    <Company>
+        <Code>GOOG</Code>
+        <Name>Alphabet (Google)</Name>
+        <CountryCode>PL</CountryCode>
+    </Company>
+    <Company>
+        <Code>NVDA</Code>
+        <Name>NVIDIA</Name>
+        <CountryCode>DE</CountryCode>
+    </Company>
+</Companies>

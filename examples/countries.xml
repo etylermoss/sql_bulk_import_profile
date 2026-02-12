@@ -1,0 +1,46 @@
+<Countries>
+    <Country>
+        <Code>FRA</Code>
+        <Name>France</Name>
+        <Continent>Europe</Continent>
+        <Borders>
+            <Border>
+                <CountryCode>DEU</CountryCode>
+            </Border>
+        </Borders>
+        <Mountains>
+            <Mountain>
+                <Name>Mont Blanc</Name>
+                <Height>4805.59</Height>
+            </Mountain>
+        </Mountains>
+    </Country>
+    <Country>
+        <Code>DEU</Code>
+        <Name>Germany</Name>
+        <Continent>Europe</Continent>
+        <Borders>
+            <Border>
+                <CountryCode>FRA</CountryCode>
+            </Border>
+        </Borders>
+        <Mountains>
+            <Mountain>
+                <Name>Zugspitze</Name>
+                <Height>2962.06</Height>
+            </Mountain>
+        </Mountains>
+    </Country>
+    <Country>
+        <Code>CAN</Code>
+        <Name>Canada</Name>
+        <Continent>North America</Continent>
+        <Borders/>
+        <Mountains>
+            <Mountain>
+                <Name>Mount Logan</Name>
+                <Height>5959.00</Height>
+            </Mountain>
+        </Mountains>
+    </Country>
+</Countries>

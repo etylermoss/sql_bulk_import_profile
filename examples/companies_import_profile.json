@@ -1,0 +1,85 @@
+{
+	"name": "Companies Import Profile (Example)",
+	"description": null,
+	"temporary_table_drop": false,
+	"data_source_config": {
+		"XmlDataSourceConfig": {
+			"path": "./examples/companies.xml",
+			"field_groups": {
+				"Company": [
+					{
+						"name": "Code"
+					},
+					{
+						"name": "Name"
+					},
+					{
+						"name": "CountryCode"
+					}
+				]
+			},
+			"selector": "Companies/Company"
+		}
+	},
+	"table_mappers": [
+		{
+			"name": "Companies Table Mapper",
+			"field_group": "Company",
+			"table_identifier": "[dbo].[Company]",
+			"delete_mode": "Partial",
+			"delete_action": "None",
+			"duplicate_action": "Dump",
+			"columns": [
+				{
+					"Parser": {
+						"column_identifier": "[Code]",
+						"map_column": true,
+						"field_name": "Code"
+					}
+				},
+				{
+					"Parser": {
+						"column_identifier": "[Name]",
+						"map_column": true,
+						"field_name": "Name"
+					}
+				},
+				{
+					"Lookup": {
+						"column_identifier": "[CountryID]",
+						"map_column": true,
+						"table_identifier": "[dbo].[Country]",
+						"output_column_identifier": "[ID]",
+						"key_columns": [
+							{
+								"ParserKeyColumn": {
+									"key_column_identifier": "[Code]",
+									"field_name": "CountryCode"
+								}
+							}
+						]
+					}
+				},
+				{
+					"Lookup": {
+						"column_identifier": "[ID]",
+						"map_column": true,
+						"table_identifier": "[dbo].[Company]",
+						"output_column_identifier": "[ID]",
+						"key_columns": [
+							{
+								"ParserKeyColumn": {
+									"key_column_identifier": "[Code]",
+									"field_name": "Code"
+								}
+							}
+						]
+					}
+				}
+			],
+			"key_columns": [
+				"Code"
+			]
+		}
+	]
+}

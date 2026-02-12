@@ -1,0 +1,72 @@
+{
+	"name": "Currencies Import Profile (Example)",
+	"temporary_table_drop": false,
+	"data_source_config": {
+		"DelimitedDataSourceConfig": {
+			"path": "./examples/currencies.csv",
+			"reader_config": "Csv",
+			"field_groups": {
+				"Currency": [
+					{
+						"name": "Code"
+					},
+					{
+						"name": "Name"
+					}
+				]
+			}
+		}
+	},
+	"preprocess_script": {
+		"File": {
+			"language": "Rhai",
+			"path": "./examples/currencies.rhai"
+		}
+	},
+	"table_mappers": [
+		{
+			"name": "Currency Table Mapper",
+			"field_group": "Currency",
+			"table_identifier": "[dbo].[Currency]",
+			"delete_mode": "Partial",
+			"delete_action": "None",
+			"duplicate_action": "Dump",
+			"preprocess_function": "uppercase_values",
+			"columns": [
+				{
+					"Parser": {
+						"column_identifier": "[Code]",
+						"map_column": true,
+						"field_name": "Code"
+					}
+				},
+				{
+					"Parser": {
+						"column_identifier": "[Name]",
+						"map_column": true,
+						"field_name": "Name"
+					}
+				},
+				{
+					"Lookup": {
+						"column_identifier": "[ID]",
+						"map_column": true,
+						"table_identifier": "[dbo].[Currency]",
+						"output_column_identifier": "[ID]",
+						"key_columns": [
+							{
+								"ParserKeyColumn": {
+									"key_column_identifier": "[Code]",
+									"field_name": "Code"
+								}
+							}
+						]
+					}
+				}
+			],
+			"key_columns": [
+				"Code"
+			]
+		}
+	]
+}
