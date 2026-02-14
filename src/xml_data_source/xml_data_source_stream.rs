@@ -1,3 +1,4 @@
+use crate::data_source::string_map::StringMap;
 use crate::data_source::{
     DataSourceErrorIndex, DataSourceRecord, DataSourceRecordIndex, ReadRecordError,
 };
@@ -166,10 +167,7 @@ impl<R: AsyncRead + Unpin> Stream for XmlDataSource<R> {
                             .take()
                             .and_then(|field_index| fields.get_index(field_index))
                         {
-                            current_field_indices.insert(
-                                field_name.clone(),
-                                *current_field_start..current_data.len(),
-                            );
+                            current_field_indices.insert(field_name.clone(), current_data.len());
 
                             *current_field_start = current_data.len();
                         } else {
@@ -180,9 +178,15 @@ impl<R: AsyncRead + Unpin> Stream for XmlDataSource<R> {
                     } else if *depth == selector_parts.len() - 1 {
                         *record_number = NonZero::new(record_number.map_or(1, |r| r.get() + 1));
 
+                        let record_fields = unsafe {
+                            StringMap::new(
+                                std::mem::take(current_data),
+                                std::mem::take(current_field_indices),
+                            )
+                        };
+
                         let record = DataSourceRecord::new(
-                            std::mem::take(current_data),
-                            std::mem::take(current_field_indices),
+                            record_fields,
                             DataSourceRecordIndex {
                                 record_number: record_number.expect("always non-zero"),
                                 line_start: *current_line_start,

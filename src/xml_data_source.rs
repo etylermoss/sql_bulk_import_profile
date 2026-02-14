@@ -2,11 +2,10 @@ mod xml_data_source_stream;
 
 use crate::import_profile::Field;
 use arrayvec::ArrayVec;
-use indexmap::IndexSet;
+use indexmap::{IndexMap, IndexSet};
 use quick_xml::Reader;
-use rustc_hash::{FxBuildHasher as BuildHasher, FxHashMap as HashMap};
+use rustc_hash::FxBuildHasher as BuildHasher;
 use std::num::NonZeroU64;
-use std::ops::Range;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use thiserror::Error;
@@ -38,7 +37,7 @@ pub struct XmlDataSource<R> {
 #[derive(Debug)]
 struct CurrentRecordState {
     field_data: String,
-    field_indices: HashMap<Arc<str>, Range<usize>>,
+    field_indices: IndexMap<Arc<str>, usize, BuildHasher>,
     field_index: Option<usize>,
     field_start: usize,
     line_start: u64,
@@ -48,7 +47,7 @@ impl CurrentRecordState {
     fn new(fields_length: usize) -> Self {
         Self {
             field_data: String::new(),
-            field_indices: HashMap::with_capacity_and_hasher(fields_length, BuildHasher),
+            field_indices: IndexMap::with_capacity_and_hasher(fields_length, BuildHasher),
             field_index: None,
             field_start: 0,
             line_start: 0,

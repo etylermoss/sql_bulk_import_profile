@@ -12,7 +12,7 @@ use crate::preprocess::{
 };
 use crate::table_mapper::{CreateTableMapperError, TableMapper};
 use crate::xml_data_source::{CreateXmlDataSourceError, XmlDataSource};
-use futures::{Stream, StreamExt, TryStreamExt};
+use futures::{Stream, TryStreamExt};
 use log::warn;
 use rustc_hash::FxHashMap as HashMap;
 use schemars::JsonSchema;

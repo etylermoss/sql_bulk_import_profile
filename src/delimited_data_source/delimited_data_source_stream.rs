@@ -170,9 +170,9 @@ mod tests {
                 assert_eq!(record.index().record_number.get(), 1);
                 assert_eq!(record.index().line_start, 2);
                 assert_eq!(record.index().line_end, 2);
-                assert_eq!(record.field("A").unwrap(), "a1");
-                assert_eq!(record.field("B").unwrap(), "b1");
-                assert_eq!(record.field("C").unwrap(), "c1");
+                assert_eq!(record.get("A").unwrap(), "a1");
+                assert_eq!(record.get("B").unwrap(), "b1");
+                assert_eq!(record.get("C").unwrap(), "c1");
             }
             other => panic!("expected record 1 but got: {:?}", other),
         };

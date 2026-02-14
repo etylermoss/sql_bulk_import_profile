@@ -1,16 +1,15 @@
 mod delimited_data_source_stream;
 
+use crate::data_source::string_map::StringMap;
 use crate::data_source::{DataSourceRecord, DataSourceRecordIndex};
 use crate::import_profile::{
     DelimitedReaderConfig, DelimitedReaderCustomConfig, Field, Terminator,
 };
 use csv_core::{ReadRecordResult, Reader};
-use indexmap::IndexSet;
+use indexmap::{IndexMap, IndexSet};
 use rustc_hash::FxBuildHasher as BuildHasher;
-use rustc_hash::FxHashMap as HashMap;
 use std::char::TryFromCharError;
 use std::num::NonZero;
-use std::ops::Range;
 use std::path::Path;
 use std::str::Utf8Error;
 use std::string::FromUtf8Error;
@@ -209,29 +208,21 @@ impl RecordBuffer {
             return Err(ParseRecordError::TooFewFields);
         }
 
-        let field_indices: Result<HashMap<Arc<str>, Range<usize>>, ParseRecordError> = self
+        let field_indices: Result<IndexMap<Arc<str>, usize, _>, ParseRecordError> = self
             .ends_buffer[..self.ends_used]
             .iter()
             .enumerate()
-            .scan(0, |prev, (idx, &curr)| {
-                let range = *prev..curr;
-
-                *prev = curr;
-
-                match field_names.get_index(idx) {
-                    Some(field) => Some(Ok((field.clone(), range))),
-                    None => Some(Err(ParseRecordError::TooManyFields)),
-                }
+            .map(|(idx, &curr)| match field_names.get_index(idx) {
+                Some(field) => Ok((field.clone(), curr)),
+                None => Err(ParseRecordError::TooManyFields),
             })
             .collect();
 
         let field_data = self.clear();
 
-        Ok(DataSourceRecord::new(
-            String::from_utf8(field_data)?,
-            field_indices?,
-            index,
-        ))
+        let fields = unsafe { StringMap::new(String::from_utf8(field_data)?, field_indices?) };
+
+        Ok(DataSourceRecord::new(fields, index))
     }
 }
 

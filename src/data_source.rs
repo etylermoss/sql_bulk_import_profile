@@ -1,18 +1,22 @@
-use hash_map::Iter;
-use rustc_hash::FxBuildHasher as BuildHasher;
-use rustc_hash::FxHashMap as HashMap;
-use std::collections::hash_map;
+pub mod string_map;
+
+use crate::data_source::string_map::{StringMap, StringMapIter};
+use rustc_hash::FxBuildHasher;
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
 use std::num::NonZero;
-use std::ops::Range;
 use std::sync::Arc;
-use thiserror::__private18::AsDynError;
 
 pub type DataSourceStreamItem = Result<DataSourceRecord, Box<dyn ReadRecordError>>;
 
-pub trait ReadRecordError: AsDynError<'static> + Error + Send + Sync + 'static {
+pub trait ReadRecordError: Error + Display + Debug + Send + Sync + 'static {
     fn index(&self) -> DataSourceErrorIndex;
+}
+
+impl Error for Box<dyn ReadRecordError> {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        self.as_ref().source()
+    }
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -50,24 +54,13 @@ impl Display for DataSourceErrorIndex {
 
 #[derive(Debug)]
 pub struct DataSourceRecord {
+    fields: StringMap<Arc<str>>,
     index: DataSourceRecordIndex,
-    field_data: String,
-    field_indices: HashMap<Arc<str>, Range<usize>>,
 }
 
 impl Display for DataSourceRecord {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}, fields: {{ ", self.index)?;
-
-        for (i, (key, value)) in self.field_indices.iter().enumerate() {
-            if i > 0 {
-                write!(f, ", ")?;
-            }
-
-            write!(f, "\"{}\": \"{}\"", key, &self.field_data[value.clone()])?;
-        }
-
-        write!(f, " }}")?;
+        write!(f, "{}, fields: {{ {} }}", self.index, self.fields)?;
 
         Ok(())
     }
@@ -75,72 +68,31 @@ impl Display for DataSourceRecord {
 
 impl DataSourceRecord {
     pub fn new(
-        field_data: String,
-        field_indices: HashMap<Arc<str>, Range<usize>>,
+        fields: StringMap<Arc<str>>,
         index: DataSourceRecordIndex,
     ) -> Self {
         DataSourceRecord {
-            field_data,
-            field_indices,
+            fields,
             index,
         }
     }
 
-    pub fn from_iter<K: AsRef<str>, V: AsRef<str>>(
-        fields: impl ExactSizeIterator<Item = (K, V)>,
-        index: DataSourceRecordIndex,
-    ) -> Self {
-        let mut field_data = String::with_capacity(fields.len() * 16);
-        let mut field_indices = HashMap::with_capacity_and_hasher(fields.len(), BuildHasher);
-
-        for (k, v) in fields {
-            let start = field_data.len();
-
-            field_data.push_str(v.as_ref());
-            field_indices.insert(Arc::from(k.as_ref()), start..field_data.len());
-        }
-
-        Self {
-            field_data,
-            field_indices,
-            index,
-        }
+    #[inline(always)]
+    pub fn get(&self, key: &str) -> Option<&str> {
+        self.fields.get(key)
     }
 
-    pub fn field(&self, key: &str) -> Option<&str> {
-        self.field_indices
-            .get(key)
-            .map(|r| &self.field_data[r.clone()])
-    }
-
+    #[inline(always)]
     pub fn index(&self) -> DataSourceRecordIndex {
         self.index
     }
 }
 
-pub struct DataSourceRecordIter<'a> {
-    data: &'a str,
-    inner: Iter<'a, Arc<str>, Range<usize>>,
-}
-
-impl<'a> Iterator for DataSourceRecordIter<'a> {
-    type Item = (&'a str, &'a str);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.inner
-            .next()
-            .map(|(k, v)| (k.as_ref(), &self.data[v.clone()]))
-    }
-}
-
 impl<'a> IntoIterator for &'a DataSourceRecord {
-    type Item = (&'a str, &'a str);
-    type IntoIter = DataSourceRecordIter<'a>;
+    type Item = (&'a Arc<str>, &'a str);
+    type IntoIter = StringMapIter<'a, Arc<str>, FxBuildHasher>;
 
     fn into_iter(self) -> Self::IntoIter {
-        DataSourceRecordIter {
-            data: self.field_data.as_ref(),
-            inner: self.field_indices.iter(),
-        }
+        self.fields.into_iter()
     }
 }

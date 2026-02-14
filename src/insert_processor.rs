@@ -85,7 +85,7 @@ impl<'temp_table, 'connection: 'temp_table, 'column_graph: 'temp_table>
         let mut row = TokenRow::with_capacity(self.target_columns.len());
 
         for &(parser_column, _, metadata) in &self.target_columns {
-            let field_value = record.field(parser_column.field_name()).ok_or_else(|| {
+            let field_value = record.get(parser_column.field_name()).ok_or_else(|| {
                 ProcessRecordError::RecordMissingField {
                     column: parser_column.identifier().to_owned(),
                     field: parser_column.field_name().to_owned(),

@@ -1,3 +1,4 @@
+use crate::data_source::string_map::StringMap;
 use crate::data_source::{DataSourceRecord, DataSourceRecordIndex};
 use crate::import_profile::import_profile_raw::PreprocessScript;
 use crate::preprocess::{
@@ -128,13 +129,19 @@ impl PreprocessTransform for PreprocessLuaTransform {
             .function
             .call::<Option<BTreeMap<String, String>>>((record, index))?;
 
-        Ok(result.map(|fields| DataSourceRecord::from_iter(fields.into_iter(), index)))
+        Ok(result.map(|fields| {
+            let fields = StringMap::from_iter(fields);
+
+            DataSourceRecord::new(fields, index)
+        }))
     }
 }
 
 impl IntoLua for DataSourceRecord {
     fn into_lua(self, lua: &Lua) -> mlua::Result<Value> {
-        Ok(Value::Table(lua.create_table_from(self.into_iter())?))
+        Ok(Value::Table(lua.create_table_from(
+            self.into_iter().map(|(k, v)| (k.as_ref(), v)),
+        )?))
     }
 }
 

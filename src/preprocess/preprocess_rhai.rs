@@ -129,7 +129,7 @@ impl PreprocessTransform for PreprocessRhaiTransform {
 
         let fields: Map = record
             .into_iter()
-            .map(|(k, v)| (k.into(), v.into()))
+            .map(|(k, v)| (k.as_ref().into(), v.into()))
             .collect();
 
         let RhaiInner { engine, scope, ast } = self.inner.as_ref();
@@ -160,15 +160,18 @@ impl PreprocessTransform for PreprocessRhaiTransform {
                 type_name: value.type_name().into(),
             }))
         } else {
-            let fields = fields.into_iter().map(|(k, v)| {
-                (
-                    k,
-                    v.into_immutable_string()
-                        .expect("Field values validated to be strings"),
-                )
-            });
+            let fields = fields
+                .into_iter()
+                .map(|(k, v)| {
+                    (
+                        k,
+                        v.into_immutable_string()
+                            .expect("Field values validated to be strings"),
+                    )
+                })
+                .collect();
 
-            Ok(Some(DataSourceRecord::from_iter(fields, index)))
+            Ok(Some(DataSourceRecord::new(fields, index)))
         }
     }
 }

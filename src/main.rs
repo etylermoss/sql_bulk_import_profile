@@ -42,7 +42,7 @@ async fn main() -> Result<(), Report> {
 #[derive(Debug, Parser)]
 #[command(version)]
 struct Args {
-    #[arg(short, long, env = "SBIP_CONNECTION_STRING")]
+    #[arg(short, long, env = "CONNECTION_STRING")]
     connection_string: String,
     #[arg(short, long)]
     import_profile: PathBuf,
